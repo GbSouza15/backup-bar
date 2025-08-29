@@ -6,42 +6,30 @@ pipeline {
         maven 'Maven'
     }
 
-    // Define uma variável para o repositório Maven local dentro do workspace
     environment {
+        // O repositório local ainda é uma boa prática para isolamento
         MAVEN_LOCAL_REPO = "${workspace}/.m2/repository"
     }
 
     stages {
-        stage('Checkout Application SCM') {
+        stage('Checkout') {
             steps {
-                echo 'Baixando o código-fonte do projeto...'
+                echo 'Baixando o código-fonte...'
                 cleanWs() 
                 checkout scm
-            }
-        }
-
-        stage('Build and Install ACE Maven Plugin') {
-            steps {
-                echo 'Clonando a branch feature/java17 e construindo o ace-maven-plugin...'
                 
+                // Precisamos clonar o plugin aqui também, pois ele faz parte do build
                 dir('ace-maven-plugin-build') {
                     git url: 'https://github.com/ot4i/ace-maven-plugin.git', branch: 'feature/java17'
-                    
-                    dir('ace-maven-plugin') {
-                        // CORREÇÃO: Força a instalação no repositório local do workspace
-                        bat "\"%MAVEN_HOME%\\bin\\mvn\" clean install -Dmaven.repo.local=\"%MAVEN_LOCAL_REPO%\""
-                    }
                 }
             }
         }
 
-        stage('Build Application') {
+        stage('Build All') {
             steps {
-                dir('Backup') {
-                    echo 'Executando o build do projeto Backup...'
-                    // CORREÇÃO: Força a leitura do repositório local do workspace
-                    bat "\"%MAVEN_HOME%\\bin\\mvn\" clean install -U -Dmaven.repo.local=\"%MAVEN_LOCAL_REPO%\""
-                }
+                echo 'Executando o build multi-módulo...'
+                // Executa um único comando a partir da raiz
+                bat "\"%MAVEN_HOME%\\bin\\mvn\" clean install -U -Dmaven.repo.local=\"%MAVEN_LOCAL_REPO%\""
             }
         }
     }
@@ -49,6 +37,7 @@ pipeline {
     post {
         success {
             echo 'Build concluído com sucesso!'
+            // O artefato .bar ainda estará no mesmo lugar
             archiveArtifacts artifacts: 'Backup/target/*.bar', fingerprint: true
         }
         failure {
