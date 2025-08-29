@@ -15,7 +15,8 @@
             <plugin>
                 <groupId>io.github.ot4i</groupId>
                 <artifactId>ace-maven-plugin</artifactId>
-                <version>4.0.0</version> <!-- Versão recente e estável do plugin comunitário -->
+                <!-- Versão corrigida para uma versão válida e disponível no Maven Central -->
+                <version>4.1.0</version>
                 <extensions>true</extensions>
             </plugin>
         </plugins>
