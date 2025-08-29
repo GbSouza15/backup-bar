@@ -9,22 +9,13 @@
         <!-- Adicione suas dependências aqui, se houver -->
     </dependencies>
 
-    <repositories>
-        <!-- Repositório da IBM para plugins e dependências do App Connect -->
-        <repository>
-            <id>ibm-integration-toolkit</id>
-            <name>IBM Integration Toolkit Repository</name>
-            <url>https://public.dhe.ibm.com/ibmdl/export/pub/software/integration/maven</url>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
-            <!-- Plugin para gerar o arquivo .bar -->
+            <!-- Plugin atualizado para 'ace-maven-plugin' do projeto ot4i -->
             <plugin>
-                <groupId>com.ibm.integration</groupId>
-                <artifactId>integration-toolkit-maven-plugin</artifactId>
-                <version>12.0.11.0</version>
+                <groupId>io.github.ot4i</groupId>
+                <artifactId>ace-maven-plugin</artifactId>
+                <version>4.0.0</version> <!-- Versão recente e estável do plugin comunitário -->
                 <extensions>true</extensions>
             </plugin>
         </plugins>
