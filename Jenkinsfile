@@ -16,9 +16,8 @@ pipeline {
 	        steps {
 	            // Executa o comando do Maven para fazer o build
 	            echo 'Executando o build do projeto...'
-	            // Alterado para navegar para a pasta do projeto antes do build
 	            dir('Backup') {
-	                bat 'mvn clean install'
+	                bat 'mvn clean install -U'
 	            }
 	        }
 	    }
