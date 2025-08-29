@@ -3,7 +3,6 @@ pipeline {
 
     // Define as ferramentas que serão usadas em todo o pipeline
     tools {
-        // Agora podemos usar sua configuração JDK 17 existente para tudo!
         jdk 'JDK 17'
         maven 'Maven'
     }
@@ -24,14 +23,11 @@ pipeline {
                 echo 'Clonando a branch feature/java17 e construindo o ace-maven-plugin...'
                 
                 dir('ace-maven-plugin-build') {
-                    // Clona o repositório do plugin, especificando la branch correta
                     git url: 'https://github.com/ot4i/ace-maven-plugin.git', branch: 'feature/java17'
                     
-                    // **CORREÇÃO AQUI**
-                    // Navega para a subpasta correta onde o pom.xml do plugin está localizado
                     dir('ace-maven-plugin') {
                         // Constrói e instala o plugin no repositório local .m2 do Jenkins
-                        bat 'mvn clean install'
+                        bat '"%MAVEN_HOME%\\bin\\mvn" clean install'
                     }
                 }
             }
@@ -42,8 +38,8 @@ pipeline {
             steps {
                 dir('Backup') {
                     echo 'Executando o build do projeto Backup...'
-                    // O build da aplicação agora usará o plugin recém-construído com JDK 17
-                    bat 'mvn clean install -U'
+                    // CORREÇÃO FINAL: Usando a variável MAVEN_HOME para garantir que o Maven correto seja executado.
+                    bat '"%MAVEN_HOME%\\bin\\mvn" clean install -U'
                 }
             }
         }
