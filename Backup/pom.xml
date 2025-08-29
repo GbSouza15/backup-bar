@@ -9,6 +9,15 @@
         <!-- Adicione suas dependências aqui, se houver -->
     </dependencies>
 
+    <repositories>
+        <!-- Repositório da IBM para plugins e dependências do App Connect -->
+        <repository>
+            <id>ibm-integration-toolkit</id>
+            <name>IBM Integration Toolkit Repository</name>
+            <url>https://public.dhe.ibm.com/ibmdl/export/pub/software/integration/maven</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <!-- Plugin para gerar o arquivo .bar -->
