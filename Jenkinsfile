@@ -16,7 +16,6 @@ pipeline {
             steps {
                 echo 'Limpando o workspace e baixando o código-fonte da aplicação...'
                 cleanWs() 
-                // Faz o checkout do seu repositório que contém o projeto 'Backup'
                 checkout scm 
             }
         }
@@ -24,16 +23,14 @@ pipeline {
         stage('Build and Install ACE Plugin') {
             steps {
                 echo 'Clonando e instalando o ace-maven-plugin...'
-                // Cria um diretório temporário para o build do plugin
                 dir('ace-maven-plugin-build') {
-                    // Clona o repositório do plugin
                     git url: 'https://github.com/ot4i/ace-maven-plugin.git', branch: 'feature/java17'
                     
-                    // Entra no diretório correto do módulo do plugin para o build
                     dir('ace-maven-plugin') {
-                        // Executa o build e instala o plugin no repositório local do workspace
-                        // Este é um processo Maven separado e independente
                         bat "\"%MAVEN_HOME%\\bin\\mvn\" clean install -Dmaven.repo.local=\"%MAVEN_LOCAL_REPO%\""
+                        
+                        // NOVO: 'Empacota' o plugin construído para uso no próximo estágio
+                        stash name: 'ace-plugin', includes: 'target/*.jar'
                     }
                 }
             }
@@ -42,11 +39,13 @@ pipeline {
         stage('Build Application') {
             steps {
                 echo 'Executando o build do projeto Backup...'
-                // Entra no diretório do seu projeto que foi baixado no estágio 'Checkout'
+                
+                // NOVO: 'Desempacota' o plugin no diretório da aplicação
+                // Embora já esteja no repo local, isso garante que ele está acessível
+                unstash 'ace-plugin'
+
                 dir('Backup') {
-                    // Executa o build da aplicação. 
-                    // Este novo processo Maven encontrará o plugin no repositório local.
-                    // O -U força a verificação de atualizações de snapshots.
+                    echo "Iniciando o build dentro de: ${pwd()}"
                     bat "\"%MAVEN_HOME%\\bin\\mvn\" clean install -U -Dmaven.repo.local=\"%MAVEN_LOCAL_REPO%\""
                 }
             }
@@ -56,7 +55,6 @@ pipeline {
     post {
         success {
             echo 'Build concluído com sucesso!'
-            // Arquiva o artefato .bar gerado
             archiveArtifacts artifacts: 'Backup/target/*.bar', fingerprint: true
         }
         failure {
