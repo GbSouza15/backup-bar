@@ -12,9 +12,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>io.github.ot4i</groupId>
+                <groupId>ibm.maven.plugins</groupId>
                 <artifactId>ace-maven-plugin</artifactId>
-                <version>4.2.0-SNAPSHOT</version>
+                <version>12.0.11-SNAPSHOT</version>
                 <extensions>true</extensions>
             </plugin>
         </plugins>
