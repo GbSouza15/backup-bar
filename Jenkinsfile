@@ -8,7 +8,7 @@ pipeline {
 	    maven 'Maven'
 	    jdk 'JDK 17'
 	}
-
+	
 	// Define os estágios do pipeline
 	stages {
 	    // Estágio para fazer o build do projeto
@@ -16,7 +16,10 @@ pipeline {
 	        steps {
 	            // Executa o comando do Maven para fazer o build
 	            echo 'Executando o build do projeto...'
-	            sh 'mvn clean install'
+	            // Alterado para navegar para a pasta do projeto antes do build
+	            dir('Backup') {
+	                bat 'mvn clean install'
+	            }
 	        }
 	    }
 	}
