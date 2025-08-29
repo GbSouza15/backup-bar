@@ -24,11 +24,15 @@ pipeline {
                 echo 'Clonando a branch feature/java17 e construindo o ace-maven-plugin...'
                 
                 dir('ace-maven-plugin-build') {
-                    // Clona o repositório do plugin, especificando a branch correta
+                    // Clona o repositório do plugin, especificando la branch correta
                     git url: 'https://github.com/ot4i/ace-maven-plugin.git', branch: 'feature/java17'
                     
-                    // Constrói e instala o plugin no repositório local .m2 do Jenkins
-                    bat 'mvn clean install'
+                    // **CORREÇÃO AQUI**
+                    // Navega para a subpasta correta onde o pom.xml do plugin está localizado
+                    dir('ace-maven-plugin') {
+                        // Constrói e instala o plugin no repositório local .m2 do Jenkins
+                        bat 'mvn clean install'
+                    }
                 }
             }
         }
