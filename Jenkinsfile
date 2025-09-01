@@ -10,7 +10,7 @@ pipeline {
         checkout scm
         echo "📂 WORKSPACE: ${env.WORKSPACE}"
         bat 'dir /a /-c'
-        bat 'if exist "Backup" (pushd "Backup" & cd & dir /a /-c & popd) else (echo Pasta "Backup" nao encontrada )'
+        bat 'if exist "Backup" (pushd "Backup" & cd & dir /a /-c & popd) else (echo Pasta "Backup" nao encontrada  )'
       }
     }
 
@@ -18,11 +18,11 @@ pipeline {
       steps {
         dir('Backup') {
           bat """
-            rem ==== ACE bin (8.3 p/ evitar espacos) ====
+            rem ==== ACE bin (8.3 p/ evitar espaços) ====
             for %%A in ("C:\\Program Files\\IBM\\ACE\\13.0.4.0\\server\\bin") do set "ACE_BIN_S=%%~sA"
             set "PATH=%ACE_BIN_S%;%PATH%"
 
-            rem ==== Carrega variaveis do ACE ====
+            rem ==== Carrega variáveis do ACE ====
             call "%ACE_BIN_S%\\mqsiprofile.cmd"
 
             rem ==== Caminhos ====
@@ -55,10 +55,9 @@ pipeline {
   post {
     success {
       echo '✅ Build concluído com sucesso!'
-      // ARQUIVA ANTES DE LIMPAR
       archiveArtifacts artifacts: 'Backup/target/*.bar', fingerprint: true, onlyIfSuccessful: true
     }
-    always {
+    cleanup {
       echo '🧹 Limpando workspace...'
       cleanWs()
     }
