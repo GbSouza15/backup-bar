@@ -29,54 +29,67 @@ pipeline {
 
     stage('Build BAR (ibmint)') {
       steps {
-        dir("${env.APP_DIR}") {
+        dir('Backup') {
           bat """
-            rem ===== PATH do ACE (usa nome 8.3 para evitar espacos) =====
-            for %%A in ("${env.ACE_BIN}") do set "ACE_BIN_S=%%~sA"
+            rem ===== PATH do ACE (usa nome 8.3 p/ evitar espacos) =====
+            for %%A in ("C:\\Program Files\\IBM\\ACE\\13.0.4.0\\server\\bin") do set "ACE_BIN_S=%%~sA"
             set "PATH=%ACE_BIN_S%;%PATH%"
-
+    
             rem ===== Conferencias rapidas =====
+            echo --- whoami ---
+            whoami
+            echo --- where ibmint / ace ---
             where ibmint
-            ibmint version  2>&1
-
-            rem ===== Confere se e uma Application ACE valida =====
-            if not exist "%WORKSPACE%\\${env.APP_DIR}\\application.descriptor" (
-              echo ERRO: application.descriptor nao encontrado em %WORKSPACE%\\${env.APP_DIR}
+            where ace
+    
+            rem ===== Checa/aceita licenca no usuario de servico =====
+            if exist "%ACE_BIN_S%\\ace.exe" (
+              echo --- ace license --status ---
+              "%ACE_BIN_S%\\ace.exe" license --status  2>&1 || (
+                echo --- ace license --accept ---
+                "%ACE_BIN_S%\\ace.exe" license --accept  2>&1
+              )
+            )
+    
+            rem ===== Verifica Application ACE =====
+            if not exist "%WORKSPACE%\\Backup\\application.descriptor" (
+              echo ERRO: application.descriptor nao encontrado em %WORKSPACE%\\Backup
               exit /b 2
             )
-
-            rem ===== Garante pasta de saida =====
-            if not exist "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}" mkdir "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}"
-
-            rem ===== Compile (mensagens mais claras) =====
+    
+            rem ===== Pre-cria pastas de trabalho/saida (evita erro de permissao) =====
+            if not exist "%WORKSPACE%\\_out" mkdir "%WORKSPACE%\\_out"
+            if not exist "%WORKSPACE%\\Backup\\target" mkdir "%WORKSPACE%\\Backup\\target"
+    
+            rem ===== Mostra versao (confirma PATH) =====
+            echo --- ibmint version ---
+            ibmint version 2>&1
+    
+            rem ===== COMPILE (sem --log-file; imprime direto no console) =====
+            echo --- ibmint compile ---
             ibmint compile ^
-              --input-path "%WORKSPACE%\\${env.APP_DIR}" ^
+              --input-path "%WORKSPACE%\\Backup" ^
               --output-work-dir "%WORKSPACE%\\_out" ^
-              --log-level debug ^
-              --log-file "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\ibmint_compile.log"  2>&1
-            if errorlevel 1 (
-              type "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\ibmint_compile.log"
-              exit /b 1
-            )
-
-            rem ===== Package =====
+              --log-level debug  2>&1
+            echo COMPILE_EXITCODE=%ERRORLEVEL%
+            if errorlevel 1 exit /b %ERRORLEVEL%
+    
+            rem ===== PACKAGE (idem, log no console) =====
+            echo --- ibmint package ---
             ibmint package ^
-              --input-path "%WORKSPACE%\\${env.APP_DIR}" ^
-              --output-bar-file "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\${env.BAR_NAME}" ^
-              --log-level debug ^
-              --log-file "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\ibmint_package.log"  2>&1
-            if errorlevel 1 (
-              type "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\ibmint_package.log"
-              exit /b 1
-            )
-
-            rem ===== Mostra logs no console (util para diagnostico) =====
-            type "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\ibmint_compile.log"
-            type "%WORKSPACE%\\${env.APP_DIR}\\${env.OUT_DIR}\\ibmint_package.log"
+              --input-path "%WORKSPACE%\\Backup" ^
+              --output-bar-file "%WORKSPACE%\\Backup\\target\\Backup.bar" ^
+              --log-level debug  2>&1
+            echo PACKAGE_EXITCODE=%ERRORLEVEL%
+            if errorlevel 1 exit /b %ERRORLEVEL%
+    
+            rem ===== Lista artefato gerado =====
+            dir /b "%WORKSPACE%\\Backup\\target"
           """
         }
       }
     }
+
   }
 
   post {
